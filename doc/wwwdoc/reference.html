@@ -1,0 +1,253 @@
+<!doctype html>
+<html>
+	<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta http-equiv="Pragma" content="no-cache" />
+	<!-- meta name="lang" content="es" /-->
+	<meta name="author" content="ºDeme." />
+	<link rel="icon"
+		    type="image/png"
+		    href="img/favicon.png">
+	<link rel="stylesheet" href="dmdoc1.css" type="text/css" media="all" />
+	<script type="text/javascript" src="dmdoc1.js"></script>
+	<title>jdmcgi - Reference</title>
+	<script>
+		dmdoc.subsubsectionWithNumber(false);
+	</script>
+	</head>
+	<body>
+	<script>dmdoc.begin("jdmcgi", "Reference");</script>
+
+	<script>dmdoc.s("Abstract");</script>
+	<p>
+	<i>dmcgi</i> is a program to connect web pages with a server. It only gives a few options to manage sessions, write in server and use several utilities.
+	</p>
+
+	<script>dmdoc.s("Install");</script>
+	<p>
+	<i>dmcgi</i> works in combination with <a href="http://httpd.apache.org/">Apache web server</a> and <a href="http://www.java.com">Java Virtual Machine</a>.
+	</p>
+	<p>
+	It is necessary that Apache and Java server be installed previously. Moreover, the command <tt>java -version</tt> must work and show a version equal or greater than 1.8.0_20.
+	</p>
+
+		<script>dmdoc.ss("Apache configuration");</script>
+		<p>
+		It is necessary to configure Apache for accessing to the directory with cgi programs. A possible configuration is:
+		</p>
+		<pre>
+  ScriptAlias /cgi-bin/ /home/johnny/app/cgi/
+  &lt;Directory /home/johnny/app/cgi/>
+    AllowOverride None
+    Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch
+    AddHandler cgi-script .cgi
+    Order allow,deny
+    Allow from all
+    Require all granted
+  &lt;/Directory></pre>
+		<p>
+		You must create the directory <tt>/home/johnny/app/cgi</tt> and make its owner the user who Apache server uses (typically <tt>www-data</tt>). You also have to take care to give it read and write permissions.
+		</p>
+
+		<script>dmdoc.ss("Program files location");</script>
+		<script>dmdoc.sss("In <i>cgi</i> directory");</script>
+		<p>
+		It is necessary to place next files in the directory previously created (in our case <tt>/home/johnny/app/cgi</tt>). Files are:
+		</p>
+		<dl>
+		<dt><b>cgi.jar</b></dt>
+			<dd>Server program which receive data through port 12565.</dd>
+		<dt><b>jdmcgi.sh</b></dt>
+		  <dd>Script to connect Apache with <i>cgi.jar</i>. You have to ensure <i>jdmcgi.sh</i> has execution permissions.</dd>
+		<dt><b>jdmcgi_start.sh</b></dt>
+			<dd>Script to launch <i>cgi.jar</i>. It should be called when system is started. It needs execution permissions.</dd>
+		<dt><b>jdmcgi_server</b></dt>
+		</dl>
+		<p>
+		Also is neccessary to create a subdirectory called <i>dmcgi</i> which will be used to place program directories.
+		</p>
+		<script>dmdoc.sss("In <i>bin</i> directory");</script>
+		<p>
+		On the other hand, you can place in some directory, preferably in a <i>bin</i> directory, the <b>jdmcgi_server</b>, ensuring execution permissions and easy accessibility.
+		</p>
+		<p><i>jdmcgi_server</i> works with usual options <tt>start</tt>, <tt>stop</tt> and <tt>restart</tt>.
+		</p>
+
+	<script>dmdoc.s("Running");</script>
+	<p>
+	You can place a command in <tt>/etc/rc.local</tt> like:
+	</p>
+	<pre>
+	su -c "curl http://localhost/cgi-bin/jdmcgi_start.sh" johnny &</pre>
+	<p>
+	After thar if it is necessary stop, start or restart <i>jdmcgi</i>, you can call to jdmcgi_server [stop|start|restart]
+	</p>
+	<p>
+	The main command is <tt>curl http://localhost/cgi-bin/jdmcgi_start.sh</tt> that order Apache to start the script <i>jdmcgi_start.h</i>.
+	</p>
+	<p>
+	On the other hand, <tt>su</tt> executes the previous command with <i>jhonny</i> permissions.
+	</p>
+	
+	
+	<script>dmdoc.s("Use from <i>javascript</i>");</script>
+
+		<a name="first_time"></a>
+		<script>dmdoc.ss("The first time");</script>
+		<p>
+		<i>javascript</i> interacts with <i>dmcgi</i> by <tt>XMLHttpRequest</tt> calls. Those calls send and receive JSON objects.
+		</p>
+		<p>
+		Before using <i>dmcgi</i> for first time you must create a directory, hanging on the <i>dmcgi</i> directory, with the same name as your program.
+		</p>
+		<p>
+		When a program use <i>dmcgi</i> for first time, <i>dmcgi</i> checks if the corresponding directory exists. If this is not, <i>dmcgi</i> throws an error. Otherwise, <i>dmcgi</i> request a password for <i>admin</i> and start working.
+		</p>
+		<p>
+		On subsequent uses <i>dmcgi</i> request a session id. If this is not supplied, it request an user authentication.
+		</p>
+		<p>
+		Communications client-server protocol is explained below.
+		</p>
+
+		<script>dmdoc.ss("Starting a client program");</script>
+		<p>
+		A client program is written in javascript. At the beginning every program should give next steps:
+		</p>
+		<ol>
+		  <li>
+		  Request session id to local store.
+			<ul>
+			  <li>
+			  If session id does not exists, client must ask whether application has been registered.
+			  <ul>
+				  <li>
+				  If application has been registered, client will send admin password and data of application configuration. Server will return a session id. Client should annotate it in local store and continue. In that moment <tt>"admin"</tt> is the active user.
+				  </li>
+				  <li>
+				  Otherwise, application will not be able to continue (See paragraph <a href="#first_time">The first time</a>)
+				  </li>
+			  </ul>
+				</li>
+			  <li>
+			  Otherwise, client send an user authentication. Server will answer whether authentication is correct:
+			  <ul>
+			    <li>
+			    If authentication is correct, server returns a session id. Client should annotate it in local store and continue.
+			    </li>
+			    <li>
+			    Otherwise, client should send user authentication again.
+			    </li>
+			  </ul>
+		    </li>
+		  </ul>
+		  </li>
+		  <li>
+		  Request page id to server and save it in local store. Later client can use this id to validate requests to server which can modify data.
+		  </li>
+		  <li>
+		  Go on with application and make those requests which client needs.
+		  </li>
+		</ol>
+
+	<script>dmdoc.s("Requests & responses");</script>
+	<p>
+	Request and responses are sent by JSON objects. These communications are descripted in detail in next sections.
+	</p>
+	<p>Every request has the field <tt>"app"</tt>. They also have the field <tt>"session_id"</tt>; but in the case of those which are used to authentification. Requests for managing data usually will take the field <tt>"page_id"</tt> to control wrong data base access.
+	</p>
+	<p>
+	On the other hand, responses always take the field <tt>"error"</tt>. This field is an empty string if no error has happened, otherwise contains an error message.
+	</p>
+
+	<script>dmdoc.s("Data base");</script>
+	<p>
+	Each program has an own directory. Its name must match with the content of request field <tt>"app"</tt>.
+	</p>
+	<p>
+	In this directory there are three files:
+	</p>
+	<ul>
+	  <li>users. Containing user data.</li>
+	  <li>session_configuration. Containing data for session control.
+	  <li>sessions. Containing session data.</li>
+	</ul>
+	<p>
+	These files are text files and its data are serialized with JSON.
+	</p>
+
+		<script>dmdoc.ss("<i>user</i> file");</script>
+		<p>
+		This file contains a map with the user data.
+		</p>
+
+			<script>dmdoc.sss("Fields");</script>
+			<dl>
+			<dt><tt>key</tt></dt>
+				<dd>String with the user name.</dd>
+			<dt><tt>value</tt></dt>
+				<dd>Codified string with the user password.</dd>
+			</dl>
+
+			<script>dmdoc.sss("Behaviour");</script>
+			<p>
+			There is a user called <tt>"admin"</tt> who can not be deleted. Its password is set when the application is initialized.
+			</p>
+			<p>
+			"dmcgi" make an encryption of password before saving it. However is convenient that password already come previously encrypted for security.
+			</p>
+
+		<script>dmdoc.ss("<i>session_configuration</i> file");</script>
+		<p>
+		This file contains an object with two fields. Its data is used for controlling live session number and session expiration.
+		</p>
+
+			<script>dmdoc.sss("Fields");</script>
+			<dl>
+			<dt><tt>live_sessions</tt></dt>
+				<dd>
+				Integer with the maximum session number allowed. Its value will be at least 1.
+				</dd>
+			<dt><tt>expiration</tt></dt>
+				<dd>Integer with seconds to session expiration</dd>
+			</dl>
+
+		 <script>dmdoc.sss("Behaviour");</script>
+		 <p>
+		 Values of this file are set when application is initialized.
+		 </p>
+
+		<script>dmdoc.ss("<i>sessions</i> file");</script>
+		<p>
+		This file contains a map with session data.
+		</p>
+
+			<script>dmdoc.sss("Fields");</script>
+			<dl>
+			<dt><tt>key</tt></dt>
+				<dd>String with the user name.</dd>
+			<dt><tt>value</tt></dt>
+				<dd>
+				Object with next fields:
+					<dl>
+					<dt><tt>session_id</tt></dt>
+						<dd>String with session identifier</dd>
+					<dt><tt>time</tt></dt>
+					  <dd>
+					  Long number with the last time that client requested the session id.
+					  </dd>
+					</dl>
+				</dd>
+			</dl>
+			<script>dmdoc.sss("Behaviour");</script>
+			<p>
+			When an user is authenticated server sends to client a random string (session id) which is saved in this file. This operation fails if user is new and connection number is greater than it is indicated in <i>session_configuration</i> file.
+			</p>
+			<p>
+			The <tt>"time"</tt> value is used to calculate session expiration. Its value is updated each time that user requests an authentication.
+			</p>
+
+
+	<script>dmdoc.end();</script>
+	</body>
+</html>

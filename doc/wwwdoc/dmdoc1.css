@@ -1,0 +1,79 @@
+/*
+ * Copyright 11-jul-2014 ºDeme
+ *
+ * This file is part of 'dmDoc'.
+ *
+ * 'dmDoc' is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License.
+ *
+ * 'dmDoc' is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with 'dmDoc'.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+BODY {
+  font-family: sans;font-size: 14px;
+  margin-right: 50px; margin-left: 50px;
+  margin-top: 5px; background-color: #f0f0f0
+}
+
+A{
+  text-decoration: none; font-family: sans;
+  color: #000080; font-weight: normal;font-size:14px;
+}
+A.index{
+  text-decoration: none; font-family: sans;
+  color: #000080; font-weight: normal;font-size:14px;
+}
+A.top{
+  text-decoration: none; font-family: sans;
+  color: #a9a9a9; font-weight: normal;font-size:14px;
+}
+
+TT{color:#400030; font-size: 14px}
+pre {
+  background-color: rgb(245, 245, 248);
+  border: 1px solid rgb(110,130,150);
+  padding: 4px; border-radius: 10px;
+  font-size:12px;
+}
+TABLE.border {border: 1px solid rgb(110,130,150);}
+TD {font-family: sans;font-size: 14px;
+  margin-right: 5px; margin-left: 5px;}
+TD.border {border: 1px solid rgb(110,130,150);}
+TD.line {border-top:solid 1px}
+
+P.title {
+  text-align:center;
+}
+SPAN.title {
+  font-family: sans;
+  color: #000080; font-weight: bold;font-size:25px;
+}
+SPAN.subtitle {
+  font-family: sans;
+  font-weight: bold;font-size:20px;
+}
+
+H1 {font-size:28px;margin-top:0px;font-weight:normal}
+H2 {font-size:22px;margin-top:50px;font-weight:normal}
+H3 {font-size:17px;font-weight:bold}
+
+.frame {
+  background-color: rgb(250, 250, 250);
+  border: 1px solid rgb(110,130,150);
+  font-family: sans;font-size: 14px;
+  padding: 4px;border-radius: 4px;
+}
+.frame2 {
+  background-color: rgb(250, 250, 230);
+  border: 1px solid rgb(110,130,150);
+  font-family: sans;font-size: 14px;
+  padding: 4px;border-radius: 4px;
+}
+

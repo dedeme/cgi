@@ -1,0 +1,4 @@
+#!/bin/bash
+cd /deme/dmJava8/app/cgi/
+gitk
+

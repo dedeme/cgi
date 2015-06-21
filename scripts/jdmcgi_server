@@ -1,0 +1,19 @@
+#!/bin/bash
+
+case "$1" in
+	start)
+		echo "-end-" | nc localhost 12565 &> /dev/null
+		curl http://localhost/cgi-bin/jdmcgi_start.sh &
+		;;
+	stop)
+		echo "-end-" | nc localhost 12565
+		;;
+	restart|reload)
+		echo "-end-" | nc localhost 12565
+		curl http://localhost/cgi-bin/jdmcgi_start.sh &
+		;;
+	*)
+	  echo "Usage: jdmcgi_server {start|stop|restart|reload}"
+	  ;;
+esac
+
