@@ -76,7 +76,7 @@ public class Cgi {
         BufferedReader in = new BufferedReader(
           new InputStreamReader(clientSocket.getInputStream()));
 
-        new Thread(() -> {
+        Runnable rn= () -> {
           try {
             String inputLine;
             if ((inputLine = in.readLine()) != null) {
@@ -93,7 +93,10 @@ public class Cgi {
           } catch (IOException ex) {
             Logger.getLogger(Cgi.class.getName()).log(Level.SEVERE, null, ex);
           }
-        }).start();
+        };
+
+        Thread th = new Thread(rn);
+        th.start();
       }
     } catch (IOException ex) {
       System.out.println("Exception caught when trying to listen on port "

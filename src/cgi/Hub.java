@@ -42,6 +42,7 @@ public class Hub {
   Invocable invocable;
   PrintWriter out;
   String request;
+  String sync;
   String appName;
   String script;
   String func;
@@ -68,6 +69,11 @@ public class Hub {
   }
 
   void wwwerror(Exception ex) {
+    int ix = request.indexOf("\"session_id\"");
+    if (ix != -1) {
+      int ix2 = request.indexOf(",", ix);
+      request = request.substring(0, ix) + request.substring(ix2 + 1);
+    }
     String response = ex.getMessage() + "\n"
       + request + "\n"
       + It.join(It.from(ex.getStackTrace()).map(
@@ -81,10 +87,12 @@ public class Hub {
   }
 
   void eval() {
+
     try {
       engine.eval(new FileReader(
         "scripts" + File.separator + appName + File.separator + script
       ));
+
       wwwsend();
     } catch (Exception e) {
       wwwerror(e);
@@ -104,12 +112,12 @@ public class Hub {
       );
       String[] data = (String[]) hub.invocable.invokeFunction(
         "hub_send", hub.request);
-      String sync = data[0];
+      hub.sync = data[0];
       hub.appName = data[1];
       hub.script = data[2];
       hub.func = data[3];
 
-      switch (sync) {
+      switch (hub.sync) {
         case "SEQ":
           processSeq(hub);
         case "READ":
@@ -118,7 +126,7 @@ public class Hub {
           processRW(hub, false);
         default:
           hub.wwwerror(
-            new Exception(sync + " is not a synchronization operation"));
+            new Exception(hub.sync + " is not a synchronization operation"));
       }
     } catch (Exception e) {
       hub.wwwerror(e);
