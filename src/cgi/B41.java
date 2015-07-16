@@ -59,16 +59,16 @@ public class B41 {
    * @return
    */
   public static String encode (String s) {
-    String r = "";
+    StringBuilder r = new StringBuilder();
     int i;
     for (i = 0; i < s.length(); i++) {
       int n = s.codePointAt(i);
       int n1 = n / 41;
-      r = r + chars.charAt(n1 / 41) +
-        chars.charAt(n1 % 41) +
-        chars.charAt(n % 41);
+      r.append(chars.charAt(n1 / 41)).append(
+        chars.charAt(n1 % 41)).append(
+        chars.charAt(n % 41));
     }
-    return r;
+    return r.toString();
   }
 
   /**
@@ -77,15 +77,15 @@ public class B41 {
    * @return
    */
   public static String decode (String c) {
-    String r = "";
+    StringBuilder r = new StringBuilder();
     int i = 0;
     while (i < c.length()) {
       int n1 = chars.indexOf(c.charAt(i++));
       int n2 = chars.indexOf(c.charAt(i++));
       int n3 = chars.indexOf(c.charAt(i++));
-      r = r + new String(Character.toChars(1681 * n1 + 41 * n2 + n3));
+      r.append(new String(Character.toChars(1681 * n1 + 41 * n2 + n3)));
     }
-    return r;
+    return r.toString();
   }
 
   /**
@@ -100,22 +100,22 @@ public class B41 {
       odd = true;
       --lg;
     }
-    String r = "";
+    StringBuilder r = new StringBuilder();
     int i = 0;
     while (i < lg) {
       int n = bs[i]  * 256 + bs[i + 1];
       int n1 = n / 41;
-      r = r + chars.charAt(n1 / 41) +
-        chars.charAt(n1 % 41) +
-        chars.charAt(n % 41);
+      r.append(chars.charAt(n1 / 41)).append(
+        chars.charAt(n1 % 41)).append(
+        chars.charAt(n % 41));
       i += 2;
     }
     if (odd) {
       int n = bs[i];
-      r = r + chars.charAt(n / 41) + chars.charAt(n % 41);
+      r.append(chars.charAt(n / 41)).append(chars.charAt(n % 41));
     }
 
-    return r;
+    return r.toString();
   }
 
   /**
@@ -123,7 +123,7 @@ public class B41 {
    * @param c
    * @return
    */
-  public static int[] decodeBytes (String c) {
+  public static int[] decodeInts (String c) {
     int lg = c.length();
     boolean odd = false;
     if (lg % 3 != 0) {
@@ -152,6 +152,42 @@ public class B41 {
   }
 
   /**
+   * Decodes a bytes[] codified with encodeBytes
+   * @param c
+   * @return
+   */
+  public static byte[] decodeBytes (String c) {
+    int lg = c.length();
+    boolean odd = false;
+    if (lg % 3 != 0) {
+      odd = true;
+      lg -= 2;
+    }
+    ArrayList<Byte>r = new ArrayList<>();
+    int i = 0;
+    while (i < lg) {
+      int n1 = chars.indexOf(c.charAt(i++));
+      int n2 = chars.indexOf(c.charAt(i++));
+      int n3 = chars.indexOf(c.charAt(i++));
+      int n = 1681 * n1 + 41 * n2 + n3;
+      r.add((byte)(n / 256));
+      r.add((byte)(n % 256));
+    }
+    if (odd) {
+      int n1 = chars.indexOf(c.charAt(i++));
+      int n2 = chars.indexOf(c.charAt(i++));
+      int n = 41 * n1 + n2;
+      r.add((byte)n);
+    }
+
+    byte[] rb = new byte[r.size()];
+    for (i = 0; i < rb.length; i++){
+      rb[i] = r.get(i);
+    }
+    return rb;
+  }
+
+  /**
    * Compressing a B41 code. It is useful to codify strings.
    * @param s
    * @return
@@ -161,30 +197,30 @@ public class B41 {
     int n = 0;
     int i = 0;
     String tmp = "";
-    String r = "";
+    StringBuilder r = new StringBuilder();
     while (i < c.length()) {
       if (c.substring(i, i + 2).equals("RT")) {
         ++n;
         tmp = tmp + c.charAt(i + 2);
         if (n == 10) {
-          r = r + (n - 1) + tmp;
+          r.append(String.valueOf(n - 1)).append(tmp);
           tmp = "";
           n = 0;
         }
       } else {
         if (n > 0) {
-          r = r + (n - 1) + tmp;
+          r.append(String.valueOf(n - 1)).append(tmp);
           tmp = "";
           n = 0;
         }
-        r = r + c.substring(i, i + 3);
+        r.append(c.substring(i, i + 3));
       }
       i += 3;
     }
     if (n > 0) {
-      r = r + (n - 1) + tmp;
+      r.append(String.valueOf(n - 1)).append(tmp);
     }
-    return r;
+    return r.toString();
   }
 
   /**
@@ -193,7 +229,7 @@ public class B41 {
    * @return
    */
   public static String decompress (String c) {
-    String r = "";
+    StringBuilder r = new StringBuilder();
     int i = 0;
     while (i < c.length()) {
       char ch = c.charAt(i++);
@@ -201,17 +237,17 @@ public class B41 {
         int n = Character.digit(ch, 10) + 1;
         for (int j = 0; j < n; j++) {
           ch = c.charAt(i++);
-          r = r + "RT" + ch;
+          r.append("RT").append(ch);
         }
       } else {
-        r = r + ch;
+        r.append(ch);
         for (int j = 0; j < 2; j++) {
           ch = c.charAt(i++);
-          r = r + ch;
+          r.append(ch);
         }
       }
     }
-    return decode(r);
+    return decode(r.toString());
   }
 
 }

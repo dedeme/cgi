@@ -75,7 +75,7 @@ public class Cryp {
       k += k;
     }
     k = k.substring(0, lg2);
-    int dt[] = B41.decodeBytes(B41.encode(k));
+    int dt[] = B41.decodeInts(B41.encode(k));
     lg2 = dt.length;
 
     int sum = 0;

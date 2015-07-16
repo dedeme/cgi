@@ -51,14 +51,14 @@ public class B41Test {
 
     int a[] = {0, 23, 116, 225};
     assertEquals("RRoixx", B41.encodeBytes(a));
-    int ar[] = B41.decodeBytes(B41.encodeBytes(a));
+    int ar[] = B41.decodeInts(B41.encodeBytes(a));
     for (int i = 0; i < a.length; i++) {
       assertEquals(a[i], ar[i]);
     }
 
     int a2[] = {0, 23, 5, 116, 225};
     assertEquals("RRoRzTWl", B41.encodeBytes(a2));
-    int a2r[] = B41.decodeBytes(B41.encodeBytes(a2));
+    int a2r[] = B41.decodeInts(B41.encodeBytes(a2));
     for (int i = 0; i < a2.length; i++) {
       assertEquals(a2[i], a2r[i]);
     }
