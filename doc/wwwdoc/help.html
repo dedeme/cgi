@@ -20,10 +20,140 @@
 
     <script>dmdoc.s("Abstract");</script>
     <p>
-    <i>dmcgi</i> is a port for connecting web pages with a server. It only gives a few options to manage sessions, write in server and use several utilities.
+    <i>dmcgi</i> is a port for connecting web pages with a server.
     </p>
     <p>
-    It requires to have installed <a href=http://httpd.apache.org/">Apache web server</a> and <a href="http://www.java.com">Java Virtual Machine</a> version >= 1.8.0_20.
+    It requires to have installed <a href=http://httpd.apache.org/">Apache web server</a> and <a href="http://www.java.com">Java Virtual Machine</a> version >= 1.8.
+    </p>
+
+    <script>dmdoc.s("Initial Install");</script>
+    <p>
+    We find in dmcgi package next files:
+    <p>
+    <dl>
+    <dt><tt>cgi.jar</tt></dt>
+      <dd>Main java program.</dd>
+    <dt><tt>jdmcgi_start.sh</tt><dt>
+      <dd>Bash script which launch cgi.jar.</dd>
+    <dt><tt>jdmcgi_server</tt><dt>
+      <dd>Bash sctipt which launch jdmcgi server.</dd>
+    <dt><tt>jdmcgi.sh</tt></dt>
+      <dd>Bash script which communicates <i>Apache server</i> with <i>cgi.jar</i>.</dd>
+    <dt><tt>help.html</tt></dt>
+      <dd>Help file.</dd>
+    <dt><tt>doc</tt></dt>
+      <dd>Documentation with will be able to be accessed from program web pages.</dd>
+    </dl>
+    <p>
+    Below we will explain where will have to be installed these programs.
+    <p>
+    Installation consists in next steps:
+    </p>
+    <ol>
+    <li>Place package files.</li>
+    <li>Prepare <i>Java Virtual Machine</i>.</li>
+    <li>Prepare <i>Apache server</i>.</li>
+    <li>Prepare operative system.</li>
+    </ol>
+    
+    <script>dmdoc.s("Place package files");</script>
+    <p>
+    We will suppose a particular installation. In it there are next directories:
+    </p>
+    <dl>
+    <dt><tt>~/www</tt></dt>
+      <dd>Web directory</dd>
+    <dt><tt>~/bin</tt></dt>
+      <dd>Directory for installing programs which can be directly executables.</dd>
+    </dl>
+    <p>
+    We will create a new normal directory called <i>~/wwwcgi</i>. Inside of this we will create two more directories: <i>~/wwwcgi/scripts</i> and <i>~/wwwcgi/dmcgi</i>. The former with user owner and the latter with <tt>www-data</tt> owner (or any else which Apache sever uses).These two directories will be used by applications.
+   </p>
+   <p>
+   We will also create another normal directory called <i>~/www/dmcgi</i> which, in the same way, will be used by applications.
+   </p>
+   <p>
+   After that we will have next structure:
+   </p>
+   <pre>
+   ~
+     bin
+     www
+       dmcgi
+     wwwcgi
+       dmcgi
+       scripts
+</pre>
+   <p>
+   Now we will place files:
+   </p>
+   <pre>
+   In ~/bin      : jdmcgi_server
+   In ~/www/dmcgi: doc (In way that will result the directory ~/www/dmcgi/doc)
+   In ~/wwwdmcgi : cgi.jar, jdmcgi_start.sh and jdmcgi.sh
+</pre>
+  <p>
+  Note that <tt>jdmcgi_server</tt>, <tt>jdmcgi_start.sh</tt> and <tt>jdmcgi.sh</tt> must have execute permissions.
+  </p>
+
+    <script>dmdoc.s("Prepare <i>Java Virtual Machine</i>");</script>
+    <p>
+    You must use Java version 1.8. We have prove the program with version 1.8.0_20. You must also be able to launch a <i>.jar</i> file with <tt>java -jar file.jar</tt>.
+    </p>
+    
+    <script>dmdoc.s("Prepare <i>Apache server</i>");</script>
+    <p>
+    You must add next entry in Apache configuration file (in </i>/etc/apache2/sites-available</i>)
+    <pre>
+	ScriptAlias /cgi-bin/ /home/peter/wwwcgi/
+	&lt;Directory /home/peter/wwwcgi/>
+		AllowOverride None
+		Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch
+		AddHandler cgi-script .cgi
+		Order allow,deny
+		Allow from all
+		Require all granted
+	&lt;/Directory>
+</pre>
+    <p>
+    After that you should restart Apache with <tt>sudo apach2ctl restart</tt>.
+    </p>
+    
+    <script>dmdoc.s("Prepare operative system");</script>
+    
+    <p>
+    In this point you can launch jdmcgi with <tt>curl http://localhost/cgi-bin/jdmcgi_start.sh &</tt> or simply with <tt>jdmcgi_server start</tt>.
+    </p>
+    <p>
+    However if you want to launch automatically <i>jdmcgi</i> when boot the system, you can include next line in <tt>/etc/rc.local</tt>
+    </p>
+    <pre>
+    su -c "curl http://localhost/cgi-bin/jdmcgi_start.sh" <i>user</i> &
+</pre>
+    
+    <script>dmdoc.s("Applications install");</script>
+    
+    <p>
+    Applications came with two directories in their package.
+    </p>
+    <ul>
+    <li><tt><i>www</i></tt>. A directory with the application name containing web files.</li>
+    <li><tt><i>scripts</i></tt>. A directory with <i>javascript</i> scripts with will be used by <i>jdmcgi</i>.</li>
+    </ul>
+    <p>
+    Let us suppose that the application name is <i>Calc</i>. You must create next directories:
+    </p>
+    <pre>
+    ~/www/dmcgi/Calc (Normal directory)
+    ~/wwwdmcgi/scripts/Calc (Normal directory)
+    ~/wwwdmcgi/dmcgi/Calc (Making owner "www-data")
+</pre>
+    <ul>
+    <li>In <tt>~/www/dmcgi/Calc</tt> you will copy the contents of <i>www</i> directory. You can copy <i>www</i> in <i>~/www/dmcgi</i> and then change the name <i>www</i> by </i>Calc</i>.</li>
+    <li>In <tt>~/wwwdmcgi/scripts/Calc</tt> you will copy the contents of <i>scripts</i> directory. You can copy <i>scripts</i> in <i>~/wwwdmcgi/scripts</i> and then change the name <i>scripts</i> by </i>Calc</i>.</li>
+    </ul>
+    <p>
+    <tt>~/wwwdmcgi/dmcgi/Calc</tt> will remain empty and will be used by application.
     </p>
     
     <script>dmdoc.end();</script>

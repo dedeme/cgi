@@ -1,0 +1,100 @@
+#!/bin/bash
+
+create_help() {
+  echo '<body onload="location='"'"'doc/help.html'"'"';"></body>' > install/help.html 
+}
+
+copy_doc() {
+ cp -r doc/wwwdoc install
+ mv install/wwwdoc install/doc
+ create_help
+}
+
+copy_scripts() {
+  cp scripts/* install
+  copy_doc
+}
+
+create_jar() {
+  cd install
+  FILES=$(ls)
+# $JAR cames from extract_main()
+  jar -cmf META-INF/MANIFEST.MF $JAR $FILES
+  for FILE in $FILES; do
+    rm -fr $FILE
+  done
+  cd ..
+  copy_scripts
+}
+
+create_manifest() {
+  cd "install/META-INF"
+  cat MANIFEST.MF | grep "^Manifest-Version:" > NEW.MF
+  cat MANIFEST.MF | grep "^Main-Class:" >> NEW.MF
+  rm -f MANIFEST.MF
+  mv NEW.MF MANIFEST.MF
+  cd ../..
+  create_jar
+}
+
+extract_main() {
+  cd dist
+  JARS=$(ls *.jar)
+  cd ..
+  for JAR in $JARS; do
+    cp dist/$JAR install
+    cd install
+    jar -xf $JAR
+    rm $JAR
+    cd ..
+  done
+  create_manifest
+}
+
+extract_lib() {
+  JARS=$(ls dist/lib)
+  for JAR in $JARS; do
+    cp dist/lib/$JAR install
+    cd install
+    jar -xf $JAR
+    if [ -d "META-INF" ]; then
+      rm -fr "META-INF"
+    fi
+    rm $JAR
+    cd ..
+  done
+  extract_main
+}
+
+verify_lib() {
+  if [ -d "dist/lib" ]; then
+    extract_lib
+  else
+    extract_main
+  fi
+}
+
+create_install_directory() {
+  if [ -d "install" ]; then
+    rm -fr install
+  fi
+  mkdir install
+  verify_lib
+}
+
+verify_dist() {
+  if [ ! -d "dist" ]; then
+    echo "Does not exist directory 'dist'"
+  else
+    create_install_directory
+  fi
+}
+
+PREVIOUS_DIR=$(pwd)
+ROOT_DIR=$(dirname $0)
+
+cd $ROOT_DIR
+
+verify_dist
+
+cd $PREVIOUS_DIR
