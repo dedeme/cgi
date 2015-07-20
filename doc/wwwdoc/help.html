@@ -16,7 +16,7 @@
   </script>
   </head>
   <body>
-  	<script>dmdoc.begin("jdmcgi", "Help");</script>
+    <script>dmdoc.begin("jdmcgi", "Help");</script>
 
     <script>dmdoc.s("Abstract");</script>
     <p>
@@ -33,8 +33,6 @@
     <dl>
     <dt><tt>cgi.jar</tt></dt>
       <dd>Main java program.</dd>
-    <dt><tt>jdmcgi_start.sh</tt><dt>
-      <dd>Bash script which launch cgi.jar.</dd>
     <dt><tt>jdmcgi_server</tt><dt>
       <dd>Bash sctipt which launch jdmcgi server.</dd>
     <dt><tt>jdmcgi.sh</tt></dt>
@@ -55,8 +53,8 @@
     <li>Prepare <i>Apache server</i>.</li>
     <li>Prepare operative system.</li>
     </ol>
-    
-    <script>dmdoc.s("Place package files");</script>
+        
+    <script>dmdoc.s("Modify and place package files");</script>
     <p>
     We will suppose a particular installation. In it there are next directories:
     </p>
@@ -67,7 +65,7 @@
       <dd>Directory for installing programs which can be directly executables.</dd>
     </dl>
     <p>
-    We will create a new normal directory called <i>~/wwwcgi</i>. Inside of this we will create two more directories: <i>~/wwwcgi/scripts</i> and <i>~/wwwcgi/dmcgi</i>. The former with user owner and the latter with <tt>www-data</tt> owner (or any else which Apache sever uses).These two directories will be used by applications.
+    We will create a new normal directory called <i>~/wwwcgi</i>. Inside of this we will create two more directories: <i>~/wwwcgi/scripts</i> and <i>~/wwwcgi/dmcgi</i>.These two directories will be used by applications.
    </p>
    <p>
    We will also create another normal directory called <i>~/www/dmcgi</i> which, in the same way, will be used by applications.
@@ -90,31 +88,73 @@
    <pre>
    In ~/bin      : jdmcgi_server
    In ~/www/dmcgi: doc (In way that will result the directory ~/www/dmcgi/doc)
-   In ~/wwwdmcgi : cgi.jar, jdmcgi_start.sh and jdmcgi.sh
+   In ~/wwwcgi : cgi.jar and jdmcgi.sh
 </pre>
   <p>
-  Note that <tt>jdmcgi_server</tt>, <tt>jdmcgi_start.sh</tt> and <tt>jdmcgi.sh</tt> must have execute permissions.
+  Then we modify ~/bin/jdmcgi_server lines marked in bold by the corresponding path (in our case <tt>cd ~/wwwdmcgi</tt>)
+  <pre>
+  #!/bin/bash
+
+  DIR=$(pwd)
+
+  case "$1" in
+    start)
+      echo "-end-" | nc localhost 12565 &> /dev/null
+      <b>cd /home/deme/wwwcgi</b>
+      JAVA_BIN_COMMAND -jar cgi.jar &
+      cd $DIR
+      ;;
+    stop)
+      echo "-end-" | nc localhost 12565
+      ;;
+    restart|reload)
+      echo "-end-" | nc localhost 12565
+      <b>cd /home/deme/wwwcgi</b>
+      JAVA_BIN_COMMAND -jar cgi.jar &
+      cd $DIR
+      ;;
+    *)
+      echo "Usage: jdmcgi_server {start|stop|restart|reload}"
+      ;;
+  esac 
+</pre>
+  <p>
+  Note that <tt>jdmcgi_server</tt> and <tt>jdmcgi.sh</tt> must have execute permissions.
   </p>
 
     <script>dmdoc.s("Prepare <i>Java Virtual Machine</i>");</script>
     <p>
-    You must use Java version 1.8. We have prove the program with version 1.8.0_20. You must also be able to launch a <i>.jar</i> file with <tt>java -jar file.jar</tt>.
+    You must use Java version 1.8. We have prove the program with version 1.8.0_20. You must also be able to launch a <i>.jar</i> file with <tt>JAVA_BIN_COMMAND -jar file.jar</tt>.
     </p>
     
     <script>dmdoc.s("Prepare <i>Apache server</i>");</script>
     <p>
     You must add next entry in Apache configuration file (in </i>/etc/apache2/sites-available</i>)
     <pre>
-	ScriptAlias /cgi-bin/ /home/peter/wwwcgi/
-	&lt;Directory /home/peter/wwwcgi/>
-		AllowOverride None
-		Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch
-		AddHandler cgi-script .cgi
-		Order allow,deny
-		Allow from all
-		Require all granted
-	&lt;/Directory>
+  ScriptAlias /cgi-bin/ /home/peter/wwwcgi/
+  &lt;Directory /home/peter/wwwcgi/>
+    AllowOverride None
+    Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch
+    AddHandler cgi-script .sh
+    Order allow,deny
+    Allow from all
+    Require all granted
+  &lt;/Directory>
 </pre>
+    <p>
+    In older versions of Apache you can try:
+    </p>
+    <pre>
+  ScriptAlias /cgi-bin/ /home/peter/wwwcgi/
+  &lt;Directory /home/peter/wwwcgi/>
+    AllowOverride None
+    Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch
+    AddHandler cgi-script .sh
+    Order allow,deny
+    Allow from all
+  &lt;/Directory>
+</pre>
+    
     <p>
     After that you should restart Apache with <tt>sudo apach2ctl restart</tt>.
     </p>
@@ -122,14 +162,17 @@
     <script>dmdoc.s("Prepare operative system");</script>
     
     <p>
-    In this point you can launch jdmcgi with <tt>curl http://localhost/cgi-bin/jdmcgi_start.sh &</tt> or simply with <tt>jdmcgi_server start</tt>.
+    In this point you can launch jdmcgi with <tt>jdmcgi_server start</tt>.
     </p>
     <p>
     However if you want to launch automatically <i>jdmcgi</i> when boot the system, you can include next line in <tt>/etc/rc.local</tt>
     </p>
     <pre>
-    su -c "curl http://localhost/cgi-bin/jdmcgi_start.sh" <i>user</i> &
+    su -c "~/bin/jdmcgi_server start" <i>user</i>
 </pre>
+   <p>
+   This is <tt>su -c "~/bin/jdmcgi_server start" peter</tt> in our example.
+   </p>
     
     <script>dmdoc.s("Applications install");</script>
     
@@ -144,9 +187,9 @@
     Let us suppose that the application name is <i>Calc</i>. You must create next directories:
     </p>
     <pre>
-    ~/www/dmcgi/Calc (Normal directory)
-    ~/wwwdmcgi/scripts/Calc (Normal directory)
-    ~/wwwdmcgi/dmcgi/Calc (Making owner "www-data")
+    ~/www/dmcgi/Calc 
+    ~/wwwdmcgi/scripts/Calc 
+    ~/wwwdmcgi/dmcgi/Calc 
 </pre>
     <ul>
     <li>In <tt>~/www/dmcgi/Calc</tt> you will copy the contents of <i>www</i> directory. You can copy <i>www</i> in <i>~/www/dmcgi</i> and then change the name <i>www</i> by </i>Calc</i>.</li>
