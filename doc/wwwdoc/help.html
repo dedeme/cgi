@@ -23,7 +23,7 @@
     <i>dmcgi</i> is a port for connecting web pages with a server.
     </p>
     <p>
-    It requires to have installed <a href=http://httpd.apache.org/">Apache web server</a> and <a href="http://www.java.com">Java Virtual Machine</a> version >= 1.8.
+    It requires to have installed <a href=http://httpd.apache.org/">Apache web server</a> and <a href="http://www.java.com">Java Virtual Machine</a> version >= 1.8. It also requires the program <tt>netcat</tt>.
     </p>
 
     <script>dmdoc.s("Initial Install");</script>
@@ -34,7 +34,7 @@
     <dt><tt>cgi.jar</tt></dt>
       <dd>Main java program.</dd>
     <dt><tt>jdmcgi_server</tt><dt>
-      <dd>Bash sctipt which launch jdmcgi server.</dd>
+      <dd>Bash script which launch jdmcgi server.</dd>
     <dt><tt>jdmcgi.sh</tt></dt>
       <dd>Bash script which communicates <i>Apache server</i> with <i>cgi.jar</i>.</dd>
     <dt><tt>help.html</tt></dt>
@@ -100,7 +100,7 @@
   case "$1" in
     start)
       echo "-end-" | nc localhost 12565 &> /dev/null
-      <b>cd /home/deme/wwwcgi</b>
+      <b>cd /home/peter/wwwcgi</b>
       JAVA_BIN_COMMAND -jar cgi.jar &
       cd $DIR
       ;;
@@ -109,7 +109,7 @@
       ;;
     restart|reload)
       echo "-end-" | nc localhost 12565
-      <b>cd /home/deme/wwwcgi</b>
+      <b>cd /home/peter/wwwcgi</b>
       JAVA_BIN_COMMAND -jar cgi.jar &
       cd $DIR
       ;;
@@ -131,8 +131,8 @@
     <p>
     You must add next entry in Apache configuration file (in </i>/etc/apache2/sites-available</i>)
     <pre>
-  ScriptAlias /cgi-bin/ /home/peter/wwwcgi/
-  &lt;Directory /home/peter/wwwcgi/>
+  ScriptAlias /cgi-bin/ <b>/home/peter/wwwcgi/</b>
+  &lt;Directory <b>/home/peter/wwwcgi/</b>>
     AllowOverride None
     Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch
     AddHandler cgi-script .sh
@@ -145,8 +145,8 @@
     In older versions of Apache you can try:
     </p>
     <pre>
-  ScriptAlias /cgi-bin/ /home/peter/wwwcgi/
-  &lt;Directory /home/peter/wwwcgi/>
+  ScriptAlias /cgi-bin/ <b>/home/peter/wwwcgi/</b>
+  &lt;Directory <b>/home/peter/wwwcgi/</b>>
     AllowOverride None
     Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch
     AddHandler cgi-script .sh
